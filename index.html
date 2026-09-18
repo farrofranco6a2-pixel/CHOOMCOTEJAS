@@ -177,6 +177,13 @@
       position: relative;
     }
 
+    .card-img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     .card-img-container svg {
       width: 110px;
       height: 110px;
@@ -324,7 +331,21 @@
       filter: grayscale(100%);
     }
 
+    .album-slot img {
+      width: 54%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 12px;
+      opacity: 0.3;
+      filter: grayscale(100%);
+    }
+
     .album-slot.unlocked svg {
+      opacity: 1;
+      filter: grayscale(0%);
+    }
+
+    .album-slot.unlocked img {
       opacity: 1;
       filter: grayscale(0%);
     }
@@ -608,6 +629,7 @@
           <input type="tel" id="admin-cust-phone" placeholder="Teléfono del Cliente" style="width:100%; padding:8px; margin:10px 0; border-radius:8px; border:1px solid #ccc;">
           <label>Selecciona el sabor comprado:</label>
           <select id="admin-flavor-select" style="width:100%; padding:8px; margin:8px 0; border-radius:8px;">
+            <option value="" selected disabled>Selecciona un sabor</option>
             <!-- Opciones agregadas por JS -->
           </select>
           <button class="btn-primary" style="width:100%; margin-top:10px;" onclick="adminAddStamp()">Marcar Sabor Comprado</button>
@@ -618,6 +640,7 @@
           <h4>Generador de Códigos de Compra</h4>
           <p style="font-size:0.85rem; color:#666;">Crea códigos únicos para enviar por mensaje o entregar impresos.</p>
           <select id="code-type-select" style="width:100%; padding:8px; margin:10px 0; border-radius:8px;">
+            <option value="" selected disabled>Selecciona el tipo de código</option>
             <option value="SINGLE">Código Sabor Individual</option>
             <option value="COMBO3">Combo 3 Sabores</option>
           </select>
@@ -668,24 +691,22 @@
 
     // LOS 9 SABORES ICONICOS
     const FLAVORS = [
-      { id: "chin", name: "Chinchin Boom", desc: "Dulce Chin Chin. Colorido, crocante y cero autocontrol.", tag: "Colorido", icon: "fa-candy-cane" },
-      { id: "peca", name: "Pemmmcañas", desc: "Pecanas crocantes. Elegante por fuera, vicioso por dentro.", tag: "El Clásico", icon: "fa-seedling" },
-      { id: "mani", name: "Maní-Fiesto", desc: "Maní con chocolate. El clásico que nunca ghostea.", tag: "Favorito", icon: "fa-bolt" },
-      { id: "choc", name: "Chocmanception", desc: "Chocman adentro. Un antojo dentro de otro.", tag: "Novedad", icon: "fa-cube" },
-      { id: "oreo", name: "Oreo no era", desc: "Oreo + chocolate. Abres una y perdiste la cuenta.", tag: "Top 1", icon: "fa-cookie-bite" },
-      { id: "coco", name: "Coco Loco", desc: "Coco con chocolate. Tropical, chill y con buena vibra.", tag: "Chill", icon: "fa-sun" },
-      { id: "pasa", name: "¿Qué pasas?", desc: "Pasas con chocolate. Polémica, sí. Rica también.", tag: "Polémica", icon: "fa-wine-glass" },
-      { id: "mara", name: "Maracuyáaaaa", desc: "Maracuyá. Dulce, ácida y peligrosamente antojable.", tag: "Ácida/Dulce", icon: "fa-lemon" },
-      { id: "cafe", name: "Café Mode", desc: "Café con chocolate. Te activa tantito y luego quieres otra.", tag: "Energy", icon: "fa-mug-hot" }
+      { id: "chin", name: "Chinchin Boom", desc: "Dulce Chin Chin. Colorido, crocante y cero autocontrol.", tag: "Colorido", icon: "fa-candy-cane", image: "assets/chinchin.jpg" },
+      { id: "peca", name: "Pemmmcañas", desc: "Pecanas crocantes. Elegante por fuera, vicioso por dentro.", tag: "El Clásico", icon: "fa-seedling", image: "assets/pecana.png" },
+      { id: "mani", name: "Maní-Fiesto", desc: "Maní con chocolate. El clásico que nunca ghostea.", tag: "Favorito", icon: "fa-bolt", image: "assets/maní.png" },
+      { id: "choc", name: "Chocmanception", desc: "Chocman adentro. Un antojo dentro de otro.", tag: "Novedad", icon: "fa-cube", image: "assets/chocman.jpg" },
+      { id: "oreo", name: "Oreo no era", desc: "Oreo + chocolate. Abres una y perdiste la cuenta.", tag: "Top 1", icon: "fa-cookie-bite", image: "assets/oreo.jpg.jpg" },
+      { id: "coco", name: "Coco Loco", desc: "Coco con chocolate. Tropical, chill y con buena vibra.", tag: "Chill", icon: "fa-sun", image: "assets/coco.png" },
+      { id: "pasa", name: "¿Qué pasas?", desc: "Pasas con chocolate. Polémica, sí. Rica también.", tag: "Polémica", icon: "fa-wine-glass", image: "assets/pasas.jpg" },
+      { id: "mara", name: "Maracuyáaaaa", desc: "Maracuyá. Dulce, ácida y peligrosamente antojable.", tag: "Ácida/Dulce", icon: "fa-lemon", image: "assets/maracuyá.jpg" },
+      { id: "cafe", name: "Café Mode", desc: "Café con chocolate. Te activa tantito y luego quieres otra.", tag: "Energy", icon: "fa-mug-hot", image: "assets/café.jpg" }
     ];
 
     // ESTADO DE LA APP
     let currentCustomer = null;
     let cart = {};
     let dbMock = JSON.parse(localStorage.getItem('choom_db')) || {};
-    let votesMock = JSON.parse(localStorage.getItem('choom_votes')) || {
-      chin: 12, peca: 24, mani: 35, choc: 18, oreo: 42, coco: 15, pasa: 8, mara: 22, cafe: 19
-    };
+    let votesMock = JSON.parse(localStorage.getItem('choom_votes')) || {};
     let hasVoted = localStorage.getItem('choom_has_voted') === 'true';
     let activeCodes = JSON.parse(localStorage.getItem('choom_codes')) || {
       "CHOCO-MANI-2026": { flavor: "mani", used: false, verified: true },
@@ -712,13 +733,7 @@
           <div class="flavor-card">
             <div class="card-img-container">
               <span class="flavor-tag">${f.tag}</span>
-              <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="${f.id === 'mani' ? '#ffeaa7' : '#e8f8f2'}"/>
-                <circle cx="50" cy="45" r="22" fill="#4a2c2a"/>
-                <circle cx="42" cy="40" r="3" fill="#fff"/>
-                <circle cx="58" cy="40" r="3" fill="#fff"/>
-                <path d="M42 52 Q50 58 58 52" stroke="#fff" stroke-width="2" fill="none"/>
-              </svg>
+              <img src="${f.image}" alt="${f.name}" loading="lazy">
             </div>
             <div class="card-body">
               <h3 class="card-title">${f.name}</h3>
@@ -812,10 +827,7 @@
         const slotHtml = `
           <div class="album-slot ${isUnlocked ? 'unlocked' : ''}">
             <i class="fa-solid ${isUnlocked ? 'fa-check-circle' : 'fa-lock'} badge-lock"></i>
-            <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="35" fill="${isUnlocked ? '#a8e6cf' : '#ccc'}"/>
-              <circle cx="50" cy="45" r="18" fill="#4a2c2a"/>
-            </svg>
+            <img src="${f.image}" alt="${isUnlocked ? f.name : 'Sabor bloqueado'}" loading="lazy">
             <span class="slot-title">${f.name}</span>
           </div>
         `;
@@ -973,7 +985,7 @@
 
     function populateAdminSelect() {
       const sel = document.getElementById('admin-flavor-select');
-      sel.innerHTML = '';
+      sel.innerHTML = '<option value="" selected disabled>Selecciona un sabor</option>';
       FLAVORS.forEach(f => {
         sel.innerHTML += `<option value="${f.id}">${f.name}</option>`;
       });
@@ -985,6 +997,11 @@
 
       if (!phone) {
         alert("Ingresa el teléfono del cliente.");
+        return;
+      }
+
+      if (!flavor) {
+        alert("Selecciona el sabor comprado.");
         return;
       }
 
@@ -1007,6 +1024,11 @@
     function adminGenerateCode() {
       const type = document.getElementById('code-type-select').value;
       let newCode = "";
+
+      if (!type) {
+        alert("Selecciona el tipo de código.");
+        return;
+      }
 
       if (type === "SINGLE") {
         const randomFlv = FLAVORS[Math.floor(Math.random() * FLAVORS.length)].id;
